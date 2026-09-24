@@ -6,10 +6,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import pe.edu.upeu.MatriculaBackend.dto.CarreraRequestDTO;
 import pe.edu.upeu.MatriculaBackend.dto.CarreraResponseDTO;
+import pe.edu.upeu.MatriculaBackend.dto.CursoResponseDTO;
 import pe.edu.upeu.MatriculaBackend.entity.Carrera;
+import pe.edu.upeu.MatriculaBackend.entity.Curso;
 import pe.edu.upeu.MatriculaBackend.exception.ReglaNegocioException;
 import pe.edu.upeu.MatriculaBackend.exception.RecursoNoEncontradoException;
 import pe.edu.upeu.MatriculaBackend.repository.CarreraRepository;
+import pe.edu.upeu.MatriculaBackend.repository.CursoRepository;
 import pe.edu.upeu.MatriculaBackend.service.service.CarreraService;
 
 import java.util.List;
@@ -20,6 +23,7 @@ import java.util.List;
 public class CarreraServiceImpl implements CarreraService {
 
     private final CarreraRepository carreraRepository;
+    private final CursoRepository cursoRepository;
 
     @Override
     @Transactional
@@ -62,8 +66,18 @@ public class CarreraServiceImpl implements CarreraService {
     @Transactional
     public void eliminar(Long id) {
         Carrera carrera = buscarOFallar(id);
+        if (cursoRepository.existsByCarreraId(id)) {
+            log.warn("No se puede eliminar la carrera id={} porque tiene cursos asociados", id);
+            throw new ReglaNegocioException("No se puede eliminar la carrera porque tiene cursos asociados");
+        }
         carreraRepository.delete(carrera);
         log.info("Carrera eliminada id={}", id);
+    }
+
+    @Override
+    public List<CursoResponseDTO> listarCursosDeCarrera(Long carreraId) {
+        buscarOFallar(carreraId);
+        return cursoRepository.findByCarreraId(carreraId).stream().map(this::toCursoResponse).toList();
     }
 
     private void validarNombreUnico(String nombre, Long idActual) {
@@ -87,6 +101,22 @@ public class CarreraServiceImpl implements CarreraService {
                 carrera.getEstado(),
                 carrera.getFechaCreacion(),
                 carrera.getFechaModificacion()
+        );
+    }
+
+    private CursoResponseDTO toCursoResponse(Curso curso) {
+        return new CursoResponseDTO(
+                curso.getId(),
+                curso.getCodigo(),
+                curso.getNombre(),
+                curso.getCreditos(),
+                curso.getCiclo(),
+                curso.getVacantes(),
+                curso.getEstado(),
+                curso.getCarrera().getId(),
+                curso.getCarrera().getNombre(),
+                curso.getFechaCreacion(),
+                curso.getFechaModificacion()
         );
     }
 }
