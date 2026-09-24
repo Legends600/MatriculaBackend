@@ -44,8 +44,8 @@ public class CursoController {
             @RequestParam(required = false) Long carreraId,
             @RequestParam(required = false) Integer ciclo,
             @RequestParam(required = false) Boolean conVacantes,
-            @RequestParam(required = false) String ordenarPor,
-            @RequestParam(required = false) String direccion) {
+            @RequestParam(required = false, name = "orden") String ordenarPor,
+            @RequestParam(required = false, name = "dir") String direccion) {
         return ResponseEntity.ok(cursoService.buscar(nombre, carreraId, ciclo, conVacantes, ordenarPor, direccion));
     }
 

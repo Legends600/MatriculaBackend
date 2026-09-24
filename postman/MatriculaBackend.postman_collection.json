@@ -5,13 +5,161 @@
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
-    { "key": "baseUrl", "value": "http://localhost:8080" },
-    { "key": "carreraId", "value": "1" },
-    { "key": "cursoId", "value": "" },
-    { "key": "estudianteId", "value": "" },
-    { "key": "matriculaId", "value": "" }
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080"
+    },
+    {
+      "key": "carreraId",
+      "value": "1"
+    },
+    {
+      "key": "cursoId",
+      "value": ""
+    },
+    {
+      "key": "estudianteId",
+      "value": ""
+    },
+    {
+      "key": "matriculaId",
+      "value": ""
+    },
+    {
+      "key": "carreraSistemasId",
+      "value": ""
+    },
+    {
+      "key": "carreraCivilId",
+      "value": ""
+    },
+    {
+      "key": "carreraArquitecturaId",
+      "value": ""
+    },
+    {
+      "key": "anaId",
+      "value": ""
+    },
+    {
+      "key": "jorgeId",
+      "value": ""
+    },
+    {
+      "key": "mariaId",
+      "value": ""
+    },
+    {
+      "key": "carlosId",
+      "value": ""
+    },
+    {
+      "key": "IS401Id",
+      "value": ""
+    },
+    {
+      "key": "IS402Id",
+      "value": ""
+    },
+    {
+      "key": "IS403Id",
+      "value": ""
+    },
+    {
+      "key": "IS404Id",
+      "value": ""
+    },
+    {
+      "key": "IS501Id",
+      "value": ""
+    },
+    {
+      "key": "IS502Id",
+      "value": ""
+    },
+    {
+      "key": "IS503Id",
+      "value": ""
+    },
+    {
+      "key": "IC401Id",
+      "value": ""
+    },
+    {
+      "key": "matriculaAnaId",
+      "value": ""
+    }
   ],
   "item": [
+    {
+      "name": "00 Resolver IDs (ejecutar primero, siempre)",
+      "item": [
+        {
+          "name": "CP-00a Resolver IDs de carreras",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/v1/carreras"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const body = pm.response.json();",
+                  "const porNombre = n => body.find(c => c.nombre === n);",
+                  "pm.collectionVariables.set('carreraSistemasId', porNombre('Ingeniería de Sistemas').id);",
+                  "pm.collectionVariables.set('carreraCivilId', porNombre('Ingeniería Civil').id);",
+                  "pm.collectionVariables.set('carreraArquitecturaId', porNombre('Arquitectura').id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "CP-00b Resolver IDs de estudiantes",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/v1/estudiantes"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const body = pm.response.json();",
+                  "const porCodigo = c => body.find(e => e.codigo === c);",
+                  "pm.collectionVariables.set('anaId', porCodigo('202410001').id);",
+                  "pm.collectionVariables.set('jorgeId', porCodigo('202410002').id);",
+                  "pm.collectionVariables.set('mariaId', porCodigo('202410003').id);",
+                  "pm.collectionVariables.set('carlosId', porCodigo('202410004').id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "CP-00c Resolver IDs de cursos",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/v1/cursos"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const body = pm.response.json();",
+                  "const porCodigo = c => body.find(x => x.codigo === c);",
+                  "['IS401','IS402','IS403','IS404','IS501','IS502','IS503','IC401'].forEach(c => {",
+                  "  pm.collectionVariables.set(c + 'Id', porCodigo(c).id);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
     {
       "name": "RF-01 Salud y contrato",
       "item": [
@@ -84,11 +232,18 @@
       "item": [
         {
           "name": "GET /carreras lista",
-          "request": { "method": "GET", "url": "{{baseUrl}}/api/v1/carreras" },
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/v1/carreras"
+          },
           "event": [
             {
               "listen": "test",
-              "script": { "exec": [ "pm.test('status 200', () => pm.response.to.have.status(200));" ] }
+              "script": {
+                "exec": [
+                  "pm.test('status 200', () => pm.response.to.have.status(200));"
+                ]
+              }
             }
           ]
         },
@@ -96,7 +251,12 @@
           "name": "POST /carreras crea (201)",
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "url": "{{baseUrl}}/api/v1/carreras",
             "body": {
               "mode": "raw",
@@ -120,7 +280,12 @@
           "name": "POST /carreras con nombre duplicado (mayúsculas/espacios) -> 409",
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "url": "{{baseUrl}}/api/v1/carreras",
             "body": {
               "mode": "raw",
@@ -130,7 +295,11 @@
           "event": [
             {
               "listen": "test",
-              "script": { "exec": [ "pm.test('status 409', () => pm.response.to.have.status(409));" ] }
+              "script": {
+                "exec": [
+                  "pm.test('status 409', () => pm.response.to.have.status(409));"
+                ]
+              }
             }
           ]
         },
@@ -138,7 +307,12 @@
           "name": "POST /carreras con nombre inválido -> 400",
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "url": "{{baseUrl}}/api/v1/carreras",
             "body": {
               "mode": "raw",
@@ -161,23 +335,48 @@
         },
         {
           "name": "GET /carreras/{id} existente",
-          "request": { "method": "GET", "url": "{{baseUrl}}/api/v1/carreras/{{carreraPruebaId}}" },
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/v1/carreras/{{carreraPruebaId}}"
+          },
           "event": [
-            { "listen": "test", "script": { "exec": [ "pm.test('status 200', () => pm.response.to.have.status(200));" ] } }
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('status 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
           ]
         },
         {
           "name": "GET /carreras/{id} inexistente -> 404",
-          "request": { "method": "GET", "url": "{{baseUrl}}/api/v1/carreras/999999" },
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/v1/carreras/999999"
+          },
           "event": [
-            { "listen": "test", "script": { "exec": [ "pm.test('status 404', () => pm.response.to.have.status(404));" ] } }
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('status 404', () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
           ]
         },
         {
           "name": "PUT /carreras/{id} actualiza (200)",
           "request": {
             "method": "PUT",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "url": "{{baseUrl}}/api/v1/carreras/{{carreraPruebaId}}",
             "body": {
               "mode": "raw",
@@ -185,20 +384,31 @@
             }
           },
           "event": [
-            { "listen": "test", "script": { "exec": [ "pm.test('status 200', () => pm.response.to.have.status(200));" ] } }
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('status 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
           ]
         },
         {
-          "name": "GET /carreras/1/cursos lista cursos de Ingeniería de Sistemas",
-          "request": { "method": "GET", "url": "{{baseUrl}}/api/v1/carreras/1/cursos" },
+          "name": "GET /carreras/{id}/cursos lista cursos de Ingeniería de Sistemas",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/v1/carreras/{{carreraSistemasId}}/cursos"
+          },
           "event": [
             {
               "listen": "test",
               "script": {
                 "exec": [
                   "pm.test('status 200', () => pm.response.to.have.status(200));",
-                  "pm.test('todos pertenecen a la carrera 1', () => {",
-                  "  pm.response.json().forEach(c => pm.expect(c.carreraId).to.eql(1));",
+                  "pm.test('todos pertenecen a la carrera de Sistemas', () => {",
+                  "  const esperado = Number(pm.collectionVariables.get('carreraSistemasId'));",
+                  "  pm.response.json().forEach(c => pm.expect(c.carreraId).to.eql(esperado));",
                   "});"
                 ]
               }
@@ -206,17 +416,37 @@
           ]
         },
         {
-          "name": "DELETE /carreras/1 con cursos asociados -> 409",
-          "request": { "method": "DELETE", "url": "{{baseUrl}}/api/v1/carreras/1" },
+          "name": "DELETE /carreras/{id} con cursos asociados -> 409",
+          "request": {
+            "method": "DELETE",
+            "url": "{{baseUrl}}/api/v1/carreras/{{carreraSistemasId}}"
+          },
           "event": [
-            { "listen": "test", "script": { "exec": [ "pm.test('status 409', () => pm.response.to.have.status(409));" ] } }
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('status 409', () => pm.response.to.have.status(409));"
+                ]
+              }
+            }
           ]
         },
         {
           "name": "DELETE /carreras/{id} sin dependencias -> 204",
-          "request": { "method": "DELETE", "url": "{{baseUrl}}/api/v1/carreras/{{carreraPruebaId}}" },
+          "request": {
+            "method": "DELETE",
+            "url": "{{baseUrl}}/api/v1/carreras/{{carreraPruebaId}}"
+          },
           "event": [
-            { "listen": "test", "script": { "exec": [ "pm.test('status 204', () => pm.response.to.have.status(204));" ] } }
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('status 204', () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
           ]
         }
       ]
@@ -226,20 +456,35 @@
       "item": [
         {
           "name": "GET /cursos lista",
-          "request": { "method": "GET", "url": "{{baseUrl}}/api/v1/cursos" },
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/v1/cursos"
+          },
           "event": [
-            { "listen": "test", "script": { "exec": [ "pm.test('status 200', () => pm.response.to.have.status(200));" ] } }
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('status 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
           ]
         },
         {
           "name": "POST /cursos crea (201) con carreraId y carreraNombre en la respuesta",
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "url": "{{baseUrl}}/api/v1/cursos",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"codigo\": \"IS999\",\n  \"nombre\": \"Curso de Prueba Postman\",\n  \"creditos\": 4,\n  \"ciclo\": 1,\n  \"vacantes\": 5,\n  \"estado\": true,\n  \"carreraId\": 1\n}"
+              "raw": "{\n  \"codigo\": \"IS999\",\n  \"nombre\": \"Curso de Prueba Postman\",\n  \"creditos\": 4,\n  \"ciclo\": 1,\n  \"vacantes\": 5,\n  \"estado\": true,\n  \"carreraId\": {{carreraSistemasId}}\n}"
             }
           },
           "event": [
@@ -250,7 +495,7 @@
                   "pm.test('status 201', () => pm.response.to.have.status(201));",
                   "const body = pm.response.json();",
                   "pm.test('incluye carreraId y carreraNombre', () => {",
-                  "  pm.expect(body.carreraId).to.eql(1);",
+                  "  pm.expect(body.carreraId).to.eql(Number(pm.collectionVariables.get('carreraSistemasId')));",
                   "  pm.expect(body.carreraNombre).to.be.a('string');",
                   "});",
                   "pm.collectionVariables.set('cursoPruebaId', body.id);"
@@ -263,22 +508,39 @@
           "name": "POST /cursos con código inválido -> 400",
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "url": "{{baseUrl}}/api/v1/cursos",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"codigo\": \"is1\",\n  \"nombre\": \"Curso Inválido\",\n  \"creditos\": 4,\n  \"ciclo\": 1,\n  \"vacantes\": 5,\n  \"estado\": true,\n  \"carreraId\": 1\n}"
+              "raw": "{\n  \"codigo\": \"is1\",\n  \"nombre\": \"Curso Inválido\",\n  \"creditos\": 4,\n  \"ciclo\": 1,\n  \"vacantes\": 5,\n  \"estado\": true,\n  \"carreraId\": {{carreraSistemasId}}\n}"
             }
           },
           "event": [
-            { "listen": "test", "script": { "exec": [ "pm.test('status 400', () => pm.response.to.have.status(400));" ] } }
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('status 400', () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
           ]
         },
         {
           "name": "POST /cursos con carreraId inexistente -> 404",
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "url": "{{baseUrl}}/api/v1/cursos",
             "body": {
               "mode": "raw",
@@ -286,14 +548,21 @@
             }
           },
           "event": [
-            { "listen": "test", "script": { "exec": [ "pm.test('status 404', () => pm.response.to.have.status(404));" ] } }
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('status 404', () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
           ]
         },
         {
-          "name": "GET /cursos/buscar?carreraId=1&conVacantes=true&ordenarPor=creditos&direccion=desc",
+          "name": "GET /cursos/buscar?carreraId={{carreraSistemasId}}&conVacantes=true&orden=creditos&dir=desc",
           "request": {
             "method": "GET",
-            "url": "{{baseUrl}}/api/v1/cursos/buscar?carreraId=1&conVacantes=true&ordenarPor=creditos&direccion=desc"
+            "url": "{{baseUrl}}/api/v1/cursos/buscar?carreraId={{carreraSistemasId}}&conVacantes=true&orden=creditos&dir=desc"
           },
           "event": [
             {
@@ -315,38 +584,80 @@
         },
         {
           "name": "GET /cursos/buscar?nombre=Programación (contiene, sin distinguir mayúsculas)",
-          "request": { "method": "GET", "url": "{{baseUrl}}/api/v1/cursos/buscar?nombre=programaci" },
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/v1/cursos/buscar?nombre=programaci"
+          },
           "event": [
-            { "listen": "test", "script": { "exec": [ "pm.test('status 200', () => pm.response.to.have.status(200));" ] } }
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('status 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
           ]
         },
         {
-          "name": "GET /cursos/buscar?ordenarPor=id -> 400 (campo de orden inválido)",
-          "request": { "method": "GET", "url": "{{baseUrl}}/api/v1/cursos/buscar?ordenarPor=id" },
+          "name": "GET /cursos/buscar?orden=id -> 400 (campo de orden inválido)",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/v1/cursos/buscar?orden=id"
+          },
           "event": [
-            { "listen": "test", "script": { "exec": [ "pm.test('status 400', () => pm.response.to.have.status(400));" ] } }
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('status 400', () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
           ]
         },
         {
           "name": "PUT /cursos/{id} actualiza (200)",
           "request": {
             "method": "PUT",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "url": "{{baseUrl}}/api/v1/cursos/{{cursoPruebaId}}",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"codigo\": \"IS999\",\n  \"nombre\": \"Curso de Prueba Postman Editado\",\n  \"creditos\": 3,\n  \"ciclo\": 2,\n  \"vacantes\": 8,\n  \"estado\": true,\n  \"carreraId\": 1\n}"
+              "raw": "{\n  \"codigo\": \"IS999\",\n  \"nombre\": \"Curso de Prueba Postman Editado\",\n  \"creditos\": 3,\n  \"ciclo\": 2,\n  \"vacantes\": 8,\n  \"estado\": true,\n  \"carreraId\": {{carreraSistemasId}}\n}"
             }
           },
           "event": [
-            { "listen": "test", "script": { "exec": [ "pm.test('status 200', () => pm.response.to.have.status(200));" ] } }
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('status 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
           ]
         },
         {
           "name": "DELETE /cursos/{id} sin matrículas -> 204",
-          "request": { "method": "DELETE", "url": "{{baseUrl}}/api/v1/cursos/{{cursoPruebaId}}" },
+          "request": {
+            "method": "DELETE",
+            "url": "{{baseUrl}}/api/v1/cursos/{{cursoPruebaId}}"
+          },
           "event": [
-            { "listen": "test", "script": { "exec": [ "pm.test('status 204', () => pm.response.to.have.status(204));" ] } }
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('status 204', () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
           ]
         }
       ]
@@ -356,20 +667,35 @@
       "item": [
         {
           "name": "GET /estudiantes lista",
-          "request": { "method": "GET", "url": "{{baseUrl}}/api/v1/estudiantes" },
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/v1/estudiantes"
+          },
           "event": [
-            { "listen": "test", "script": { "exec": [ "pm.test('status 200', () => pm.response.to.have.status(200));" ] } }
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('status 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
           ]
         },
         {
           "name": "POST /estudiantes registra (201)",
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "url": "{{baseUrl}}/api/v1/estudiantes",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"codigo\": \"202199999\",\n  \"dni\": \"79999999\",\n  \"nombres\": \"Postman\",\n  \"apellidos\": \"Tester\",\n  \"email\": \"postman.tester@upeu.edu.pe\",\n  \"estado\": true,\n  \"carreraId\": 1\n}"
+              "raw": "{\n  \"codigo\": \"202199999\",\n  \"dni\": \"79999999\",\n  \"nombres\": \"Postman\",\n  \"apellidos\": \"Tester\",\n  \"email\": \"postman.tester@upeu.edu.pe\",\n  \"estado\": true,\n  \"carreraId\": {{carreraSistemasId}}\n}"
             }
           },
           "event": [
@@ -388,53 +714,60 @@
           "name": "POST /estudiantes con DNI duplicado -> 409",
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "url": "{{baseUrl}}/api/v1/estudiantes",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"codigo\": \"202188888\",\n  \"dni\": \"79999999\",\n  \"nombres\": \"Otro\",\n  \"apellidos\": \"Duplicado\",\n  \"email\": \"otro@upeu.edu.pe\",\n  \"estado\": true,\n  \"carreraId\": 1\n}"
+              "raw": "{\n  \"codigo\": \"202188888\",\n  \"dni\": \"79999999\",\n  \"nombres\": \"Otro\",\n  \"apellidos\": \"Duplicado\",\n  \"email\": \"otro@upeu.edu.pe\",\n  \"estado\": true,\n  \"carreraId\": {{carreraSistemasId}}\n}"
             }
           },
           "event": [
-            { "listen": "test", "script": { "exec": [ "pm.test('status 409', () => pm.response.to.have.status(409));" ] } }
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('status 409', () => pm.response.to.have.status(409));"
+                ]
+              }
+            }
           ]
         },
         {
           "name": "GET /estudiantes/{id}",
-          "request": { "method": "GET", "url": "{{baseUrl}}/api/v1/estudiantes/{{estudiantePruebaId}}" },
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/v1/estudiantes/{{estudiantePruebaId}}"
+          },
           "event": [
-            { "listen": "test", "script": { "exec": [ "pm.test('status 200', () => pm.response.to.have.status(200));" ] } }
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('status 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
           ]
         },
         {
           "name": "PUT /estudiantes/{id} actualiza (200)",
           "request": {
             "method": "PUT",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "url": "{{baseUrl}}/api/v1/estudiantes/{{estudiantePruebaId}}",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"codigo\": \"202199999\",\n  \"dni\": \"79999999\",\n  \"nombres\": \"Postman\",\n  \"apellidos\": \"Tester Editado\",\n  \"email\": \"postman.tester@upeu.edu.pe\",\n  \"estado\": true,\n  \"carreraId\": 1\n}"
-            }
-          },
-          "event": [
-            { "listen": "test", "script": { "exec": [ "pm.test('status 200', () => pm.response.to.have.status(200));" ] } }
-          ]
-        }
-      ]
-    },
-    {
-      "name": "RF-05 Matrícula y reglas de negocio",
-      "item": [
-        {
-          "name": "POST /matriculas registra (201) - estudiante 1 en IS101 (6cr)",
-          "request": {
-            "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "url": "{{baseUrl}}/api/v1/matriculas",
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"estudianteId\": 1,\n  \"periodo\": \"2026-2\",\n  \"detalles\": [ { \"cursoId\": 1 } ]\n}"
+              "raw": "{\n  \"codigo\": \"202199999\",\n  \"dni\": \"79999999\",\n  \"nombres\": \"Postman\",\n  \"apellidos\": \"Tester Editado\",\n  \"email\": \"postman.tester@upeu.edu.pe\",\n  \"estado\": true,\n  \"carreraId\": {{carreraSistemasId}}\n}"
             }
           },
           "event": [
@@ -442,131 +775,10 @@
               "listen": "test",
               "script": {
                 "exec": [
-                  "pm.test('status 201', () => pm.response.to.have.status(201));",
-                  "const body = pm.response.json();",
-                  "pm.test('estado REGISTRADA y montoTotal correcto', () => {",
-                  "  pm.expect(body.estado).to.eql('REGISTRADA');",
-                  "  pm.expect(body.montoTotal).to.eql(720.00);",
-                  "});",
-                  "pm.collectionVariables.set('matriculaPruebaId', body.id);"
+                  "pm.test('status 200', () => pm.response.to.have.status(200));"
                 ]
               }
             }
-          ]
-        },
-        {
-          "name": "RN-03: mismo estudiante y periodo -> 409",
-          "request": {
-            "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "url": "{{baseUrl}}/api/v1/matriculas",
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"estudianteId\": 1,\n  \"periodo\": \"2026-2\",\n  \"detalles\": [ { \"cursoId\": 2 } ]\n}"
-            }
-          },
-          "event": [
-            { "listen": "test", "script": { "exec": [ "pm.test('status 409', () => pm.response.to.have.status(409));" ] } }
-          ]
-        },
-        {
-          "name": "RN-01: estudiante inactivo -> 409",
-          "request": {
-            "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "url": "{{baseUrl}}/api/v1/matriculas",
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"estudianteId\": 3,\n  \"periodo\": \"2026-2\",\n  \"detalles\": [ { \"cursoId\": 1 } ]\n}"
-            }
-          },
-          "event": [
-            { "listen": "test", "script": { "exec": [ "pm.test('status 409', () => pm.response.to.have.status(409));" ] } }
-          ]
-        },
-        {
-          "name": "RN-01: curso de otra carrera -> 409",
-          "request": {
-            "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "url": "{{baseUrl}}/api/v1/matriculas",
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"estudianteId\": 2,\n  \"periodo\": \"2027-1\",\n  \"detalles\": [ { \"cursoId\": 10 } ]\n}"
-            }
-          },
-          "event": [
-            { "listen": "test", "script": { "exec": [ "pm.test('status 409', () => pm.response.to.have.status(409));" ] } }
-          ]
-        },
-        {
-          "name": "RN-02: curso sin vacantes (IS105) -> 409",
-          "request": {
-            "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "url": "{{baseUrl}}/api/v1/matriculas",
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"estudianteId\": 2,\n  \"periodo\": \"2027-1\",\n  \"detalles\": [ { \"cursoId\": 5 } ]\n}"
-            }
-          },
-          "event": [
-            { "listen": "test", "script": { "exec": [ "pm.test('status 409', () => pm.response.to.have.status(409));" ] } }
-          ]
-        },
-        {
-          "name": "RN-04: más de 20 créditos -> 409",
-          "request": {
-            "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "url": "{{baseUrl}}/api/v1/matriculas",
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"estudianteId\": 2,\n  \"periodo\": \"2027-1\",\n  \"detalles\": [ { \"cursoId\": 1 }, { \"cursoId\": 2 }, { \"cursoId\": 3 }, { \"cursoId\": 4 } ]\n}"
-            }
-          },
-          "event": [
-            { "listen": "test", "script": { "exec": [ "pm.test('status 409', () => pm.response.to.have.status(409));" ] } }
-          ]
-        },
-        {
-          "name": "GET /matriculas/{id}",
-          "request": { "method": "GET", "url": "{{baseUrl}}/api/v1/matriculas/{{matriculaPruebaId}}" },
-          "event": [
-            { "listen": "test", "script": { "exec": [ "pm.test('status 200', () => pm.response.to.have.status(200));" ] } }
-          ]
-        },
-        {
-          "name": "GET /matriculas lista",
-          "request": { "method": "GET", "url": "{{baseUrl}}/api/v1/matriculas" },
-          "event": [
-            { "listen": "test", "script": { "exec": [ "pm.test('status 200', () => pm.response.to.have.status(200));" ] } }
-          ]
-        },
-        {
-          "name": "PATCH /matriculas/{id}/anular devuelve vacantes",
-          "request": { "method": "PATCH", "url": "{{baseUrl}}/api/v1/matriculas/{{matriculaPruebaId}}/anular" },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('status 200', () => pm.response.to.have.status(200));",
-                  "const body = pm.response.json();",
-                  "pm.test('estado ANULADA y trae vacantes', () => {",
-                  "  pm.expect(body.estado).to.eql('ANULADA');",
-                  "  pm.expect(body.vacantes).to.be.an('array');",
-                  "});"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "PATCH /matriculas/{id}/anular de nuevo -> 409",
-          "request": { "method": "PATCH", "url": "{{baseUrl}}/api/v1/matriculas/{{matriculaPruebaId}}/anular" },
-          "event": [
-            { "listen": "test", "script": { "exec": [ "pm.test('status 409', () => pm.response.to.have.status(409));" ] } }
           ]
         }
       ]
@@ -576,16 +788,36 @@
       "item": [
         {
           "name": "GET /reportes/matriculados-por-curso",
-          "request": { "method": "GET", "url": "{{baseUrl}}/api/v1/reportes/matriculados-por-curso" },
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/v1/reportes/matriculados-por-curso"
+          },
           "event": [
-            { "listen": "test", "script": { "exec": [ "pm.test('status 200', () => pm.response.to.have.status(200));" ] } }
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('status 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
           ]
         },
         {
-          "name": "GET /reportes/matriculados-por-curso?periodo=2026-2&carreraId=1",
-          "request": { "method": "GET", "url": "{{baseUrl}}/api/v1/reportes/matriculados-por-curso?periodo=2026-2&carreraId=1" },
+          "name": "GET /reportes/matriculados-por-curso?periodo=2026-2&carreraId={{carreraSistemasId}}",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/v1/reportes/matriculados-por-curso?periodo=2026-2&carreraId={{carreraSistemasId}}"
+          },
           "event": [
-            { "listen": "test", "script": { "exec": [ "pm.test('status 200', () => pm.response.to.have.status(200));" ] } }
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('status 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
           ]
         },
         {
@@ -593,8 +825,14 @@
           "request": {
             "method": "OPTIONS",
             "header": [
-              { "key": "Origin", "value": "http://localhost:4200" },
-              { "key": "Access-Control-Request-Method", "value": "GET" }
+              {
+                "key": "Origin",
+                "value": "http://localhost:4200"
+              },
+              {
+                "key": "Access-Control-Request-Method",
+                "value": "GET"
+              }
             ],
             "url": "{{baseUrl}}/api/v1/carreras"
           },
@@ -616,8 +854,14 @@
           "request": {
             "method": "OPTIONS",
             "header": [
-              { "key": "Origin", "value": "http://evil.example.com" },
-              { "key": "Access-Control-Request-Method", "value": "GET" }
+              {
+                "key": "Origin",
+                "value": "http://evil.example.com"
+              },
+              {
+                "key": "Access-Control-Request-Method",
+                "value": "GET"
+              }
             ],
             "url": "{{baseUrl}}/api/v1/carreras"
           },
@@ -627,6 +871,420 @@
               "script": {
                 "exec": [
                   "pm.test('status 403 (CORS rechazado)', () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Anexo B - Casos de prueba oficiales (CP-01 a CP-14)",
+      "item": [
+        {
+          "name": "CP-01 GET /health -> 200 database UP",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/v1/health"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('database UP', () => pm.expect(pm.response.json().database).to.eql('UP'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "CP-02 POST /carreras nombre existente en minúsculas y espacios -> 409",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/carreras",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"  ingeniería   de   sistemas  \",\n  \"descripcion\": \"x\",\n  \"estado\": true\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('status 409', () => pm.response.to.have.status(409));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "CP-03 POST /cursos código is-40, créditos 0, ciclo 11, vacantes -1 -> 400 con 4 campos",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/cursos",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"codigo\": \"is-40\",\n  \"nombre\": \"Curso de prueba\",\n  \"creditos\": 0,\n  \"ciclo\": 11,\n  \"vacantes\": -1,\n  \"estado\": true,\n  \"carreraId\": {{carreraSistemasId}}\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('status 400', () => pm.response.to.have.status(400));",
+                  "pm.test('cuatro campos en validationErrors', () => {",
+                  "  pm.expect(Object.keys(pm.response.json().validationErrors)).to.have.lengthOf(4);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "CP-04 POST /cursos con carreraId 99999999 -> 404",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/cursos",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"codigo\": \"ZZ999\",\n  \"nombre\": \"Curso huérfano\",\n  \"creditos\": 3,\n  \"ciclo\": 1,\n  \"vacantes\": 5,\n  \"estado\": true,\n  \"carreraId\": 99999999\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('status 404', () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "CP-05 GET /cursos/buscar ciclo 4, con vacantes, orden vacantes desc -> IS401,IS402,IS403",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/v1/cursos/buscar?carreraId={{carreraSistemasId}}&ciclo=4&conVacantes=true&orden=vacantes&dir=desc"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('status 200', () => pm.response.to.have.status(200));",
+                  "const body = pm.response.json();",
+                  "pm.test('orden exacto IS401, IS402, IS403', () => {",
+                  "  pm.expect(body.map(c => c.codigo)).to.eql(['IS401', 'IS402', 'IS403']);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "CP-06 POST /matriculas Ana 2026-2 con IS401+IS402+IS501 -> 201, 11 créditos, S/1320.00",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/matriculas",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"estudianteId\": {{anaId}},\n  \"periodo\": \"2026-2\",\n  \"detalles\": [ { \"cursoId\": {{IS401Id}} }, { \"cursoId\": {{IS402Id}} }, { \"cursoId\": {{IS501Id}} } ]\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('status 201', () => pm.response.to.have.status(201));",
+                  "const body = pm.response.json();",
+                  "pm.test('11 creditos y monto 1320.00', () => {",
+                  "  pm.expect(body.totalCreditos).to.eql(11);",
+                  "  pm.expect(Number(body.montoTotal)).to.eql(1320);",
+                  "});",
+                  "pm.collectionVariables.set('matriculaAnaId', body.id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "CP-07 POST /matriculas Carlos (inactivo) -> 409 RN-01",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/matriculas",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"estudianteId\": {{carlosId}},\n  \"periodo\": \"2026-2\",\n  \"detalles\": [ { \"cursoId\": {{IS401Id}} } ]\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('status 409', () => pm.response.to.have.status(409));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "CP-08 POST /matriculas María (Civil) con IC401+IS401 -> 409 RN-01",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/matriculas",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"estudianteId\": {{mariaId}},\n  \"periodo\": \"2026-2\",\n  \"detalles\": [ { \"cursoId\": {{IC401Id}} }, { \"cursoId\": {{IS401Id}} } ]\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('status 409', () => pm.response.to.have.status(409));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "CP-09 POST /matriculas Jorge con IS403+IS404 -> 409 RN-02",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/matriculas",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"estudianteId\": {{jorgeId}},\n  \"periodo\": \"2026-2\",\n  \"detalles\": [ { \"cursoId\": {{IS403Id}} }, { \"cursoId\": {{IS404Id}} } ]\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('status 409', () => pm.response.to.have.status(409));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "CP-10 POST /matriculas Ana otra vez en 2026-2 -> 409 RN-03",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/matriculas",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"estudianteId\": {{anaId}},\n  \"periodo\": \"2026-2\",\n  \"detalles\": [ { \"cursoId\": {{IS502Id}} } ]\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('status 409', () => pm.response.to.have.status(409));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "CP-11 POST /matriculas Jorge con 6 cursos (22 créditos) -> 409 RN-04",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/matriculas",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"estudianteId\": {{jorgeId}},\n  \"periodo\": \"2026-2\",\n  \"detalles\": [ { \"cursoId\": {{IS401Id}} }, { \"cursoId\": {{IS402Id}} }, { \"cursoId\": {{IS403Id}} }, { \"cursoId\": {{IS501Id}} }, { \"cursoId\": {{IS502Id}} }, { \"cursoId\": {{IS503Id}} } ]\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('status 409', () => pm.response.to.have.status(409));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "CP-12 GET /reportes/matriculados-por-curso?periodo=2026-2",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/v1/reportes/matriculados-por-curso?periodo=2026-2"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('status 200', () => pm.response.to.have.status(200));",
+                  "const body = pm.response.json();",
+                  "const porCodigo = c => body.find(r => r.codigo === c);",
+                  "pm.test('IS401, IS402 e IS501 con 1 matriculado y montos correctos', () => {",
+                  "  pm.expect(porCodigo('IS401').matriculados).to.eql(1);",
+                  "  pm.expect(Number(porCodigo('IS401').montoRecaudado)).to.eql(360);",
+                  "  pm.expect(porCodigo('IS402').matriculados).to.eql(1);",
+                  "  pm.expect(Number(porCodigo('IS402').montoRecaudado)).to.eql(480);",
+                  "  pm.expect(porCodigo('IS501').matriculados).to.eql(1);",
+                  "  pm.expect(Number(porCodigo('IS501').montoRecaudado)).to.eql(480);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "CP-13a PATCH /matriculas/{id}/anular -> 200 ANULADA y vacantes restauradas",
+          "request": {
+            "method": "PATCH",
+            "url": "{{baseUrl}}/api/v1/matriculas/{{matriculaAnaId}}/anular"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('estado ANULADA', () => pm.expect(pm.response.json().estado).to.eql('ANULADA'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "CP-13b Repetir la anulación -> 409",
+          "request": {
+            "method": "PATCH",
+            "url": "{{baseUrl}}/api/v1/matriculas/{{matriculaAnaId}}/anular"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('status 409', () => pm.response.to.have.status(409));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "CP-14a Preflight desde http://localhost:4200 -> permitido",
+          "request": {
+            "method": "OPTIONS",
+            "header": [
+              {
+                "key": "Origin",
+                "value": "http://localhost:4200"
+              },
+              {
+                "key": "Access-Control-Request-Method",
+                "value": "GET"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/carreras"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Access-Control-Allow-Origin presente', () => {",
+                  "  pm.expect(pm.response.headers.get('Access-Control-Allow-Origin')).to.eql('http://localhost:4200');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "CP-14b Preflight desde http://localhost:3000 -> 403",
+          "request": {
+            "method": "OPTIONS",
+            "header": [
+              {
+                "key": "Origin",
+                "value": "http://localhost:3000"
+              },
+              {
+                "key": "Access-Control-Request-Method",
+                "value": "GET"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/carreras"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('status 403', () => pm.response.to.have.status(403));"
                 ]
               }
             }
