@@ -1,0 +1,638 @@
+{
+  "info": {
+    "name": "Matrícula API",
+    "description": "Colección de pruebas funcionales para la API de Matrícula (v1). Cubre los requerimientos RF-01 a RF-07 y las reglas de negocio RN-01 a RN-04. Ejecutar en orden dentro de cada carpeta.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8080" },
+    { "key": "carreraId", "value": "1" },
+    { "key": "cursoId", "value": "" },
+    { "key": "estudianteId", "value": "" },
+    { "key": "matriculaId", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "RF-01 Salud y contrato",
+      "item": [
+        {
+          "name": "GET /health devuelve 200 y database UP",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/v1/health"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('status 200', () => pm.response.to.have.status(200));",
+                  "const body = pm.response.json();",
+                  "pm.test('tiene status, database y timestamp', () => {",
+                  "  pm.expect(body).to.have.property('status');",
+                  "  pm.expect(body).to.have.property('database');",
+                  "  pm.expect(body).to.have.property('timestamp');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /v3/api-docs expone título Matrícula API y versión v1",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/v3/api-docs"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('status 200', () => pm.response.to.have.status(200));",
+                  "const body = pm.response.json();",
+                  "pm.test('titulo y version correctos', () => {",
+                  "  pm.expect(body.info.title).to.eql('Matrícula API');",
+                  "  pm.expect(body.info.version).to.eql('v1');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /swagger-ui.html responde 200",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/swagger-ui.html"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('status 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "RF-02 Carreras (CRUD)",
+      "item": [
+        {
+          "name": "GET /carreras lista",
+          "request": { "method": "GET", "url": "{{baseUrl}}/api/v1/carreras" },
+          "event": [
+            {
+              "listen": "test",
+              "script": { "exec": [ "pm.test('status 200', () => pm.response.to.have.status(200));" ] }
+            }
+          ]
+        },
+        {
+          "name": "POST /carreras crea (201)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/api/v1/carreras",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Carrera de Prueba Postman\",\n  \"descripcion\": \"Carrera creada por la colección de pruebas\",\n  \"estado\": true\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('status 201', () => pm.response.to.have.status(201));",
+                  "const body = pm.response.json();",
+                  "pm.collectionVariables.set('carreraPruebaId', body.id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /carreras con nombre duplicado (mayúsculas/espacios) -> 409",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/api/v1/carreras",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"  carrera DE prueba POSTMAN  \",\n  \"descripcion\": \"duplicado\",\n  \"estado\": true\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": { "exec": [ "pm.test('status 409', () => pm.response.to.have.status(409));" ] }
+            }
+          ]
+        },
+        {
+          "name": "POST /carreras con nombre inválido -> 400",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/api/v1/carreras",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"AB\",\n  \"descripcion\": \"muy corto\",\n  \"estado\": true\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('status 400', () => pm.response.to.have.status(400));",
+                  "pm.test('incluye validationErrors', () => {",
+                  "  pm.expect(pm.response.json().validationErrors).to.not.be.undefined;",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /carreras/{id} existente",
+          "request": { "method": "GET", "url": "{{baseUrl}}/api/v1/carreras/{{carreraPruebaId}}" },
+          "event": [
+            { "listen": "test", "script": { "exec": [ "pm.test('status 200', () => pm.response.to.have.status(200));" ] } }
+          ]
+        },
+        {
+          "name": "GET /carreras/{id} inexistente -> 404",
+          "request": { "method": "GET", "url": "{{baseUrl}}/api/v1/carreras/999999" },
+          "event": [
+            { "listen": "test", "script": { "exec": [ "pm.test('status 404', () => pm.response.to.have.status(404));" ] } }
+          ]
+        },
+        {
+          "name": "PUT /carreras/{id} actualiza (200)",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/api/v1/carreras/{{carreraPruebaId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Carrera de Prueba Postman Editada\",\n  \"descripcion\": \"actualizada\",\n  \"estado\": true\n}"
+            }
+          },
+          "event": [
+            { "listen": "test", "script": { "exec": [ "pm.test('status 200', () => pm.response.to.have.status(200));" ] } }
+          ]
+        },
+        {
+          "name": "GET /carreras/1/cursos lista cursos de Ingeniería de Sistemas",
+          "request": { "method": "GET", "url": "{{baseUrl}}/api/v1/carreras/1/cursos" },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('todos pertenecen a la carrera 1', () => {",
+                  "  pm.response.json().forEach(c => pm.expect(c.carreraId).to.eql(1));",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "DELETE /carreras/1 con cursos asociados -> 409",
+          "request": { "method": "DELETE", "url": "{{baseUrl}}/api/v1/carreras/1" },
+          "event": [
+            { "listen": "test", "script": { "exec": [ "pm.test('status 409', () => pm.response.to.have.status(409));" ] } }
+          ]
+        },
+        {
+          "name": "DELETE /carreras/{id} sin dependencias -> 204",
+          "request": { "method": "DELETE", "url": "{{baseUrl}}/api/v1/carreras/{{carreraPruebaId}}" },
+          "event": [
+            { "listen": "test", "script": { "exec": [ "pm.test('status 204', () => pm.response.to.have.status(204));" ] } }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "RF-03 Cursos (CRUD + búsqueda RF-06)",
+      "item": [
+        {
+          "name": "GET /cursos lista",
+          "request": { "method": "GET", "url": "{{baseUrl}}/api/v1/cursos" },
+          "event": [
+            { "listen": "test", "script": { "exec": [ "pm.test('status 200', () => pm.response.to.have.status(200));" ] } }
+          ]
+        },
+        {
+          "name": "POST /cursos crea (201) con carreraId y carreraNombre en la respuesta",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/api/v1/cursos",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"codigo\": \"IS999\",\n  \"nombre\": \"Curso de Prueba Postman\",\n  \"creditos\": 4,\n  \"ciclo\": 1,\n  \"vacantes\": 5,\n  \"estado\": true,\n  \"carreraId\": 1\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('status 201', () => pm.response.to.have.status(201));",
+                  "const body = pm.response.json();",
+                  "pm.test('incluye carreraId y carreraNombre', () => {",
+                  "  pm.expect(body.carreraId).to.eql(1);",
+                  "  pm.expect(body.carreraNombre).to.be.a('string');",
+                  "});",
+                  "pm.collectionVariables.set('cursoPruebaId', body.id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /cursos con código inválido -> 400",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/api/v1/cursos",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"codigo\": \"is1\",\n  \"nombre\": \"Curso Inválido\",\n  \"creditos\": 4,\n  \"ciclo\": 1,\n  \"vacantes\": 5,\n  \"estado\": true,\n  \"carreraId\": 1\n}"
+            }
+          },
+          "event": [
+            { "listen": "test", "script": { "exec": [ "pm.test('status 400', () => pm.response.to.have.status(400));" ] } }
+          ]
+        },
+        {
+          "name": "POST /cursos con carreraId inexistente -> 404",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/api/v1/cursos",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"codigo\": \"ZZ999\",\n  \"nombre\": \"Curso huérfano\",\n  \"creditos\": 4,\n  \"ciclo\": 1,\n  \"vacantes\": 5,\n  \"estado\": true,\n  \"carreraId\": 999999\n}"
+            }
+          },
+          "event": [
+            { "listen": "test", "script": { "exec": [ "pm.test('status 404', () => pm.response.to.have.status(404));" ] } }
+          ]
+        },
+        {
+          "name": "GET /cursos/buscar?carreraId=1&conVacantes=true&ordenarPor=creditos&direccion=desc",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/v1/cursos/buscar?carreraId=1&conVacantes=true&ordenarPor=creditos&direccion=desc"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('status 200', () => pm.response.to.have.status(200));",
+                  "const body = pm.response.json();",
+                  "pm.test('orden descendente por creditos', () => {",
+                  "  for (let i = 1; i < body.length; i++) {",
+                  "    pm.expect(body[i - 1].creditos).to.be.at.least(body[i].creditos);",
+                  "  }",
+                  "});",
+                  "pm.test('todos con vacantes > 0', () => body.forEach(c => pm.expect(c.vacantes).to.be.above(0)));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /cursos/buscar?nombre=Programación (contiene, sin distinguir mayúsculas)",
+          "request": { "method": "GET", "url": "{{baseUrl}}/api/v1/cursos/buscar?nombre=programaci" },
+          "event": [
+            { "listen": "test", "script": { "exec": [ "pm.test('status 200', () => pm.response.to.have.status(200));" ] } }
+          ]
+        },
+        {
+          "name": "GET /cursos/buscar?ordenarPor=id -> 400 (campo de orden inválido)",
+          "request": { "method": "GET", "url": "{{baseUrl}}/api/v1/cursos/buscar?ordenarPor=id" },
+          "event": [
+            { "listen": "test", "script": { "exec": [ "pm.test('status 400', () => pm.response.to.have.status(400));" ] } }
+          ]
+        },
+        {
+          "name": "PUT /cursos/{id} actualiza (200)",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/api/v1/cursos/{{cursoPruebaId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"codigo\": \"IS999\",\n  \"nombre\": \"Curso de Prueba Postman Editado\",\n  \"creditos\": 3,\n  \"ciclo\": 2,\n  \"vacantes\": 8,\n  \"estado\": true,\n  \"carreraId\": 1\n}"
+            }
+          },
+          "event": [
+            { "listen": "test", "script": { "exec": [ "pm.test('status 200', () => pm.response.to.have.status(200));" ] } }
+          ]
+        },
+        {
+          "name": "DELETE /cursos/{id} sin matrículas -> 204",
+          "request": { "method": "DELETE", "url": "{{baseUrl}}/api/v1/cursos/{{cursoPruebaId}}" },
+          "event": [
+            { "listen": "test", "script": { "exec": [ "pm.test('status 204', () => pm.response.to.have.status(204));" ] } }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "RF-04 Estudiantes",
+      "item": [
+        {
+          "name": "GET /estudiantes lista",
+          "request": { "method": "GET", "url": "{{baseUrl}}/api/v1/estudiantes" },
+          "event": [
+            { "listen": "test", "script": { "exec": [ "pm.test('status 200', () => pm.response.to.have.status(200));" ] } }
+          ]
+        },
+        {
+          "name": "POST /estudiantes registra (201)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/api/v1/estudiantes",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"codigo\": \"202199999\",\n  \"dni\": \"79999999\",\n  \"nombres\": \"Postman\",\n  \"apellidos\": \"Tester\",\n  \"email\": \"postman.tester@upeu.edu.pe\",\n  \"estado\": true,\n  \"carreraId\": 1\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('status 201', () => pm.response.to.have.status(201));",
+                  "pm.collectionVariables.set('estudiantePruebaId', pm.response.json().id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /estudiantes con DNI duplicado -> 409",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/api/v1/estudiantes",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"codigo\": \"202188888\",\n  \"dni\": \"79999999\",\n  \"nombres\": \"Otro\",\n  \"apellidos\": \"Duplicado\",\n  \"email\": \"otro@upeu.edu.pe\",\n  \"estado\": true,\n  \"carreraId\": 1\n}"
+            }
+          },
+          "event": [
+            { "listen": "test", "script": { "exec": [ "pm.test('status 409', () => pm.response.to.have.status(409));" ] } }
+          ]
+        },
+        {
+          "name": "GET /estudiantes/{id}",
+          "request": { "method": "GET", "url": "{{baseUrl}}/api/v1/estudiantes/{{estudiantePruebaId}}" },
+          "event": [
+            { "listen": "test", "script": { "exec": [ "pm.test('status 200', () => pm.response.to.have.status(200));" ] } }
+          ]
+        },
+        {
+          "name": "PUT /estudiantes/{id} actualiza (200)",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/api/v1/estudiantes/{{estudiantePruebaId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"codigo\": \"202199999\",\n  \"dni\": \"79999999\",\n  \"nombres\": \"Postman\",\n  \"apellidos\": \"Tester Editado\",\n  \"email\": \"postman.tester@upeu.edu.pe\",\n  \"estado\": true,\n  \"carreraId\": 1\n}"
+            }
+          },
+          "event": [
+            { "listen": "test", "script": { "exec": [ "pm.test('status 200', () => pm.response.to.have.status(200));" ] } }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "RF-05 Matrícula y reglas de negocio",
+      "item": [
+        {
+          "name": "POST /matriculas registra (201) - estudiante 1 en IS101 (6cr)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/api/v1/matriculas",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"estudianteId\": 1,\n  \"periodo\": \"2026-2\",\n  \"detalles\": [ { \"cursoId\": 1 } ]\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('status 201', () => pm.response.to.have.status(201));",
+                  "const body = pm.response.json();",
+                  "pm.test('estado REGISTRADA y montoTotal correcto', () => {",
+                  "  pm.expect(body.estado).to.eql('REGISTRADA');",
+                  "  pm.expect(body.montoTotal).to.eql(720.00);",
+                  "});",
+                  "pm.collectionVariables.set('matriculaPruebaId', body.id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "RN-03: mismo estudiante y periodo -> 409",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/api/v1/matriculas",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"estudianteId\": 1,\n  \"periodo\": \"2026-2\",\n  \"detalles\": [ { \"cursoId\": 2 } ]\n}"
+            }
+          },
+          "event": [
+            { "listen": "test", "script": { "exec": [ "pm.test('status 409', () => pm.response.to.have.status(409));" ] } }
+          ]
+        },
+        {
+          "name": "RN-01: estudiante inactivo -> 409",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/api/v1/matriculas",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"estudianteId\": 3,\n  \"periodo\": \"2026-2\",\n  \"detalles\": [ { \"cursoId\": 1 } ]\n}"
+            }
+          },
+          "event": [
+            { "listen": "test", "script": { "exec": [ "pm.test('status 409', () => pm.response.to.have.status(409));" ] } }
+          ]
+        },
+        {
+          "name": "RN-01: curso de otra carrera -> 409",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/api/v1/matriculas",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"estudianteId\": 2,\n  \"periodo\": \"2027-1\",\n  \"detalles\": [ { \"cursoId\": 10 } ]\n}"
+            }
+          },
+          "event": [
+            { "listen": "test", "script": { "exec": [ "pm.test('status 409', () => pm.response.to.have.status(409));" ] } }
+          ]
+        },
+        {
+          "name": "RN-02: curso sin vacantes (IS105) -> 409",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/api/v1/matriculas",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"estudianteId\": 2,\n  \"periodo\": \"2027-1\",\n  \"detalles\": [ { \"cursoId\": 5 } ]\n}"
+            }
+          },
+          "event": [
+            { "listen": "test", "script": { "exec": [ "pm.test('status 409', () => pm.response.to.have.status(409));" ] } }
+          ]
+        },
+        {
+          "name": "RN-04: más de 20 créditos -> 409",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/api/v1/matriculas",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"estudianteId\": 2,\n  \"periodo\": \"2027-1\",\n  \"detalles\": [ { \"cursoId\": 1 }, { \"cursoId\": 2 }, { \"cursoId\": 3 }, { \"cursoId\": 4 } ]\n}"
+            }
+          },
+          "event": [
+            { "listen": "test", "script": { "exec": [ "pm.test('status 409', () => pm.response.to.have.status(409));" ] } }
+          ]
+        },
+        {
+          "name": "GET /matriculas/{id}",
+          "request": { "method": "GET", "url": "{{baseUrl}}/api/v1/matriculas/{{matriculaPruebaId}}" },
+          "event": [
+            { "listen": "test", "script": { "exec": [ "pm.test('status 200', () => pm.response.to.have.status(200));" ] } }
+          ]
+        },
+        {
+          "name": "GET /matriculas lista",
+          "request": { "method": "GET", "url": "{{baseUrl}}/api/v1/matriculas" },
+          "event": [
+            { "listen": "test", "script": { "exec": [ "pm.test('status 200', () => pm.response.to.have.status(200));" ] } }
+          ]
+        },
+        {
+          "name": "PATCH /matriculas/{id}/anular devuelve vacantes",
+          "request": { "method": "PATCH", "url": "{{baseUrl}}/api/v1/matriculas/{{matriculaPruebaId}}/anular" },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('status 200', () => pm.response.to.have.status(200));",
+                  "const body = pm.response.json();",
+                  "pm.test('estado ANULADA y trae vacantes', () => {",
+                  "  pm.expect(body.estado).to.eql('ANULADA');",
+                  "  pm.expect(body.vacantes).to.be.an('array');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "PATCH /matriculas/{id}/anular de nuevo -> 409",
+          "request": { "method": "PATCH", "url": "{{baseUrl}}/api/v1/matriculas/{{matriculaPruebaId}}/anular" },
+          "event": [
+            { "listen": "test", "script": { "exec": [ "pm.test('status 409', () => pm.response.to.have.status(409));" ] } }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "RF-07 Reporte y CORS",
+      "item": [
+        {
+          "name": "GET /reportes/matriculados-por-curso",
+          "request": { "method": "GET", "url": "{{baseUrl}}/api/v1/reportes/matriculados-por-curso" },
+          "event": [
+            { "listen": "test", "script": { "exec": [ "pm.test('status 200', () => pm.response.to.have.status(200));" ] } }
+          ]
+        },
+        {
+          "name": "GET /reportes/matriculados-por-curso?periodo=2026-2&carreraId=1",
+          "request": { "method": "GET", "url": "{{baseUrl}}/api/v1/reportes/matriculados-por-curso?periodo=2026-2&carreraId=1" },
+          "event": [
+            { "listen": "test", "script": { "exec": [ "pm.test('status 200', () => pm.response.to.have.status(200));" ] } }
+          ]
+        },
+        {
+          "name": "OPTIONS preflight desde http://localhost:4200 -> permitido",
+          "request": {
+            "method": "OPTIONS",
+            "header": [
+              { "key": "Origin", "value": "http://localhost:4200" },
+              { "key": "Access-Control-Request-Method", "value": "GET" }
+            ],
+            "url": "{{baseUrl}}/api/v1/carreras"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Access-Control-Allow-Origin es localhost:4200', () => {",
+                  "  pm.expect(pm.response.headers.get('Access-Control-Allow-Origin')).to.eql('http://localhost:4200');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "OPTIONS preflight desde origen no autorizado -> rechazado",
+          "request": {
+            "method": "OPTIONS",
+            "header": [
+              { "key": "Origin", "value": "http://evil.example.com" },
+              { "key": "Access-Control-Request-Method", "value": "GET" }
+            ],
+            "url": "{{baseUrl}}/api/v1/carreras"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('status 403 (CORS rechazado)', () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
