@@ -14,8 +14,11 @@ import pe.edu.upeu.MatriculaBackend.repository.CursoRepository;
 import pe.edu.upeu.MatriculaBackend.repository.EstudianteRepository;
 
 /**
- * Datos semilla mínimos exigidos por el enunciado (sección 3.3), activo solo en dev.
- * Los cursos con vacantes de Ingeniería de Sistemas suman 21 créditos (> 20) para poder probar RN-04.
+ * Datos semilla del Anexo A (datos_semilla.sql), completados hasta los doce
+ * cursos y seis estudiantes exigidos en la sección 3.3. Activo solo en dev.
+ * Los cursos con vacantes de Ingeniería de Sistemas (IS401 a IS503, sin
+ * contar IS404 que tiene 0) suman 22 créditos (> 20) para poder probar RN-04
+ * con el caso de prueba CP-11 del Anexo B.
  */
 @Slf4j
 @Component
@@ -37,51 +40,56 @@ public class DataSeeder implements CommandLineRunner {
 
         Carrera sistemas = carreraRepository.save(Carrera.builder()
                 .nombre("Ingeniería de Sistemas")
-                .descripcion("Formación en desarrollo de software y sistemas de información")
+                .descripcion("EP Ingeniería de Sistemas")
                 .estado(true)
                 .build());
 
         Carrera civil = carreraRepository.save(Carrera.builder()
                 .nombre("Ingeniería Civil")
-                .descripcion("Formación en diseño y construcción de infraestructura civil")
+                .descripcion("EP Ingeniería Civil")
                 .estado(true)
                 .build());
 
         Carrera arquitectura = carreraRepository.save(Carrera.builder()
                 .nombre("Arquitectura")
-                .descripcion("Formación en diseño arquitectónico y urbanismo")
+                .descripcion("EP Arquitectura y Urbanismo")
                 .estado(true)
                 .build());
 
-        cursoRepository.save(curso("IS101", "Programación I", 6, 1, 30, true, sistemas));
-        cursoRepository.save(curso("IS102", "Estructura de Datos", 5, 2, 25, true, sistemas));
-        cursoRepository.save(curso("IS103", "Base de Datos", 5, 3, 20, true, sistemas));
-        cursoRepository.save(curso("IS104", "Ingeniería de Software", 5, 5, 15, true, sistemas));
-        cursoRepository.save(curso("IS105", "Redes y Comunicaciones", 3, 4, 0, true, sistemas));
+        // Cursos del Anexo A (IS401 a AR401)
+        cursoRepository.save(curso("IS401", "Lenguaje de Programación II", 3, 4, 30, true, sistemas));
+        cursoRepository.save(curso("IS402", "Base de Datos II", 4, 4, 25, true, sistemas));
+        cursoRepository.save(curso("IS403", "Ingeniería de Requisitos", 3, 4, 2, true, sistemas));
+        cursoRepository.save(curso("IS404", "Estadística Aplicada", 3, 4, 0, true, sistemas));
+        cursoRepository.save(curso("IS501", "Arquitectura de Software", 4, 5, 20, true, sistemas));
+        cursoRepository.save(curso("IS502", "Sistemas Operativos", 4, 5, 15, true, sistemas));
+        cursoRepository.save(curso("IS503", "Redes de Computadoras", 4, 5, 20, true, sistemas));
+        cursoRepository.save(curso("IC401", "Mecánica de Suelos", 4, 4, 30, true, civil));
+        cursoRepository.save(curso("AR401", "Taller de Diseño IV", 6, 4, 15, true, arquitectura));
 
-        cursoRepository.save(curso("CI101", "Mecánica de Suelos", 4, 3, 20, true, civil));
-        cursoRepository.save(curso("CI102", "Resistencia de Materiales", 4, 2, 0, true, civil));
-        cursoRepository.save(curso("CI103", "Topografía", 3, 1, 18, true, civil));
-        cursoRepository.save(curso("CI104", "Estructuras Metálicas", 4, 6, 12, false, civil));
+        // Completa hasta los doce cursos: otro con 0 vacantes y uno inactivo
+        cursoRepository.save(curso("IC402", "Resistencia de Materiales", 4, 5, 0, true, civil));
+        cursoRepository.save(curso("IC403", "Topografía", 3, 4, 20, false, civil));
+        cursoRepository.save(curso("AR402", "Historia de la Arquitectura", 3, 4, 25, true, arquitectura));
 
-        cursoRepository.save(curso("AR101", "Historia de la Arquitectura", 3, 1, 25, true, arquitectura));
-        cursoRepository.save(curso("AR102", "Diseño Arquitectónico I", 5, 2, 20, true, arquitectura));
-        cursoRepository.save(curso("AR103", "Urbanismo", 4, 4, 15, true, arquitectura));
+        // Estudiantes del Anexo A (Ana, Jorge, María, Carlos)
+        Estudiante ana = estudianteRepository.save(estudiante("202410001", "71234567", "Ana Lucía",
+                "Quispe Mamani", "ana.quispe@upeu.edu.pe", true, sistemas));
+        Estudiante jorge = estudianteRepository.save(estudiante("202410002", "72345678", "Jorge Luis",
+                "Condori Apaza", "jorge.condori@upeu.edu.pe", true, sistemas));
+        Estudiante maria = estudianteRepository.save(estudiante("202410003", "73456789", "María Elena",
+                "Huamán Torres", "maria.huaman@upeu.edu.pe", true, civil));
+        Estudiante carlos = estudianteRepository.save(estudiante("202410004", "74567890", "Carlos Alberto",
+                "Mamani Flores", "carlos.mamani@upeu.edu.pe", false, sistemas));
 
-        estudianteRepository.save(estudiante("202100001", "70000001", "Juan", "Pérez López",
-                "juan.perez@upeu.edu.pe", true, sistemas));
-        estudianteRepository.save(estudiante("202100002", "70000002", "María", "Gómez Rivas",
-                "maria.gomez@upeu.edu.pe", true, sistemas));
-        estudianteRepository.save(estudiante("202100003", "70000003", "Carlos", "Ramírez Soto",
-                "carlos.ramirez@upeu.edu.pe", false, sistemas));
-        estudianteRepository.save(estudiante("202100004", "70000004", "Ana", "Torres Vega",
-                "ana.torres@upeu.edu.pe", true, civil));
-        estudianteRepository.save(estudiante("202100005", "70000005", "Luis", "Fernández Cruz",
-                "luis.fernandez@upeu.edu.pe", true, civil));
-        estudianteRepository.save(estudiante("202100006", "70000006", "Rosa", "Mendoza Díaz",
-                "rosa.mendoza@upeu.edu.pe", true, arquitectura));
+        // Completa hasta los seis estudiantes
+        estudianteRepository.save(estudiante("202410005", "75678901", "Rosa Elvira",
+                "Ttito Choque", "rosa.ttito@upeu.edu.pe", true, arquitectura));
+        estudianteRepository.save(estudiante("202410006", "76789012", "Luis Fernando",
+                "Apaza Vilca", "luis.apaza@upeu.edu.pe", true, civil));
 
-        log.info("Datos semilla cargados: 3 carreras, 12 cursos, 6 estudiantes");
+        log.info("Datos semilla cargados: 3 carreras, 12 cursos, 6 estudiantes (Ana id={}, Jorge id={}, María id={}, Carlos id={})",
+                ana.getId(), jorge.getId(), maria.getId(), carlos.getId());
     }
 
     private Curso curso(String codigo, String nombre, int creditos, int ciclo, int vacantes, boolean estado,
