@@ -9,19 +9,24 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 import pe.edu.upeu.MatriculaBackend.dto.DetalleMatriculaRequestDTO;
 import pe.edu.upeu.MatriculaBackend.dto.MatriculaRequestDTO;
+import pe.edu.upeu.MatriculaBackend.dto.MatriculaResponseDTO;
 import pe.edu.upeu.MatriculaBackend.entity.Carrera;
 import pe.edu.upeu.MatriculaBackend.entity.Curso;
 import pe.edu.upeu.MatriculaBackend.entity.Estudiante;
+import pe.edu.upeu.MatriculaBackend.entity.Matricula;
 import pe.edu.upeu.MatriculaBackend.enums.EstadoMatricula;
+import pe.edu.upeu.MatriculaBackend.exception.RecursoNoEncontradoException;
 import pe.edu.upeu.MatriculaBackend.exception.ReglaNegocioException;
 import pe.edu.upeu.MatriculaBackend.repository.CursoRepository;
 import pe.edu.upeu.MatriculaBackend.repository.EstudianteRepository;
 import pe.edu.upeu.MatriculaBackend.repository.MatriculaRepository;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.when;
 
@@ -139,5 +144,34 @@ class MatriculaServiceImplTest {
         assertThatThrownBy(() -> matriculaService.registrar(request))
                 .isInstanceOf(ReglaNegocioException.class)
                 .hasMessageContaining("propia carrera");
+    }
+
+    @Test
+    void historialPorEstudiante_debeLanzarNoEncontrado_cuandoEstudianteNoExiste() {
+        when(estudianteRepository.existsById(999L)).thenReturn(false);
+
+        assertThatThrownBy(() -> matriculaService.historialPorEstudiante(999L, null))
+                .isInstanceOf(RecursoNoEncontradoException.class)
+                .hasMessageContaining("Estudiante no encontrado");
+    }
+
+    @Test
+    void historialPorEstudiante_debeRetornarMatriculasOrdenadasDeLaMasRecienteALaMasAntigua() {
+        Matricula reciente = Matricula.builder().id(2L).fecha(LocalDateTime.now())
+                .periodo("2026-2").estudiante(estudianteActivo).estado(EstadoMatricula.REGISTRADA)
+                .totalCreditos(4).montoTotal(new BigDecimal("480.00")).build();
+        Matricula antigua = Matricula.builder().id(1L).fecha(LocalDateTime.now().minusMonths(6))
+                .periodo("2026-1").estudiante(estudianteActivo).estado(EstadoMatricula.REGISTRADA)
+                .totalCreditos(4).montoTotal(new BigDecimal("480.00")).build();
+
+        when(estudianteRepository.existsById(1L)).thenReturn(true);
+        when(matriculaRepository.buscarHistorialPorEstudiante(1L, null))
+                .thenReturn(List.of(reciente, antigua));
+
+        List<MatriculaResponseDTO> historial = matriculaService.historialPorEstudiante(1L, null);
+
+        assertThat(historial).hasSize(2);
+        assertThat(historial.get(0).id()).isEqualTo(2L);
+        assertThat(historial.get(1).id()).isEqualTo(1L);
     }
 }
