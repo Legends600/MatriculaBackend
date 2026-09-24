@@ -1,4 +1,8 @@
 package pe.edu.upeu.MatriculaBackend.service.service;
 
-public interface CarreraService {
+import pe.edu.upeu.MatriculaBackend.dto.CarreraRequestDTO;
+import pe.edu.upeu.MatriculaBackend.dto.CarreraResponseDTO;
+import pe.edu.upeu.MatriculaBackend.service.generic.CrudService;
+
+public interface CarreraService extends CrudService<CarreraRequestDTO, CarreraResponseDTO, Long> {
 }
