@@ -1,0 +1,7 @@
+spring:
+  application:
+    name: MatriculaBackend
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:dev}
+  jackson:
+    default-property-inclusion: non_null
