@@ -126,11 +126,13 @@ public class MatriculaServiceImpl implements MatriculaService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public MatriculaResponseDTO obtenerPorId(Long id) {
         return toResponse(buscarOFallar(id));
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<MatriculaResponseDTO> listar() {
         return matriculaRepository.findAll().stream().map(this::toResponse).toList();
     }

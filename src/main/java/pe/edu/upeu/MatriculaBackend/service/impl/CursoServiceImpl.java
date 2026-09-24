@@ -53,11 +53,13 @@ public class CursoServiceImpl implements CursoService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public CursoResponseDTO obtenerPorId(Long id) {
         return toResponse(buscarOFallar(id));
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<CursoResponseDTO> listar() {
         return cursoRepository.findAll().stream().map(this::toResponse).toList();
     }
@@ -93,12 +95,14 @@ public class CursoServiceImpl implements CursoService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<CursoResponseDTO> listarPorCarrera(Long carreraId) {
         buscarCarreraOFallar(carreraId);
         return cursoRepository.findByCarreraId(carreraId).stream().map(this::toResponse).toList();
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<CursoResponseDTO> buscar(String nombre, Long carreraId, Integer ciclo, Boolean conVacantes,
                                           String ordenarPor, String direccion) {
         String campo = (ordenarPor == null || ordenarPor.isBlank()) ? "nombre" : ordenarPor.trim().toLowerCase();

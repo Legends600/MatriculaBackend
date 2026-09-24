@@ -45,11 +45,13 @@ public class EstudianteServiceImpl implements EstudianteService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public EstudianteResponseDTO obtenerPorId(Long id) {
         return toResponse(buscarOFallar(id));
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<EstudianteResponseDTO> listar() {
         return estudianteRepository.findAll().stream().map(this::toResponse).toList();
     }
