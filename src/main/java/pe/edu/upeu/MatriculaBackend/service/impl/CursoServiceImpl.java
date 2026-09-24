@@ -2,6 +2,8 @@ package pe.edu.upeu.MatriculaBackend.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import pe.edu.upeu.MatriculaBackend.dto.CursoRequestDTO;
@@ -10,17 +12,22 @@ import pe.edu.upeu.MatriculaBackend.entity.Carrera;
 import pe.edu.upeu.MatriculaBackend.entity.Curso;
 import pe.edu.upeu.MatriculaBackend.exception.RecursoNoEncontradoException;
 import pe.edu.upeu.MatriculaBackend.exception.ReglaNegocioException;
+import pe.edu.upeu.MatriculaBackend.exception.SolicitudInvalidaException;
 import pe.edu.upeu.MatriculaBackend.repository.CarreraRepository;
 import pe.edu.upeu.MatriculaBackend.repository.CursoRepository;
 import pe.edu.upeu.MatriculaBackend.repository.DetalleMatriculaRepository;
 import pe.edu.upeu.MatriculaBackend.service.service.CursoService;
+import pe.edu.upeu.MatriculaBackend.specification.CursoSpecifications;
 
 import java.util.List;
+import java.util.Set;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class CursoServiceImpl implements CursoService {
+
+    private static final Set<String> CAMPOS_ORDEN_VALIDOS = Set.of("nombre", "creditos", "vacantes");
 
     private final CursoRepository cursoRepository;
     private final CarreraRepository carreraRepository;
@@ -89,6 +96,38 @@ public class CursoServiceImpl implements CursoService {
     public List<CursoResponseDTO> listarPorCarrera(Long carreraId) {
         buscarCarreraOFallar(carreraId);
         return cursoRepository.findByCarreraId(carreraId).stream().map(this::toResponse).toList();
+    }
+
+    @Override
+    public List<CursoResponseDTO> buscar(String nombre, Long carreraId, Integer ciclo, Boolean conVacantes,
+                                          String ordenarPor, String direccion) {
+        String campo = (ordenarPor == null || ordenarPor.isBlank()) ? "nombre" : ordenarPor.trim().toLowerCase();
+        if (!CAMPOS_ORDEN_VALIDOS.contains(campo)) {
+            throw new SolicitudInvalidaException("El campo de orden debe ser uno de: " + CAMPOS_ORDEN_VALIDOS);
+        }
+        Sort.Direction dir = Sort.Direction.ASC;
+        if (direccion != null && !direccion.isBlank()) {
+            if (!"ASC".equalsIgnoreCase(direccion) && !"DESC".equalsIgnoreCase(direccion)) {
+                throw new SolicitudInvalidaException("La dirección debe ser ASC o DESC");
+            }
+            dir = Sort.Direction.fromString(direccion);
+        }
+
+        Specification<Curso> spec = (root, query, cb) -> cb.conjunction();
+        if (nombre != null && !nombre.isBlank()) {
+            spec = spec.and(CursoSpecifications.nombreContiene(nombre));
+        }
+        if (carreraId != null) {
+            spec = spec.and(CursoSpecifications.deCarrera(carreraId));
+        }
+        if (ciclo != null) {
+            spec = spec.and(CursoSpecifications.deCiclo(ciclo));
+        }
+        if (conVacantes != null) {
+            spec = spec.and(CursoSpecifications.conVacantes(conVacantes));
+        }
+
+        return cursoRepository.findAll(spec, Sort.by(dir, campo)).stream().map(this::toResponse).toList();
     }
 
     private void validarCodigoUnico(String codigo, Long idActual) {
