@@ -11,10 +11,13 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import pe.edu.upeu.MatriculaBackend.dto.EstudianteRequestDTO;
 import pe.edu.upeu.MatriculaBackend.dto.EstudianteResponseDTO;
+import pe.edu.upeu.MatriculaBackend.dto.MatriculaResponseDTO;
 import pe.edu.upeu.MatriculaBackend.service.service.EstudianteService;
+import pe.edu.upeu.MatriculaBackend.service.service.MatriculaService;
 
 import java.util.List;
 
@@ -25,6 +28,7 @@ import java.util.List;
 public class EstudianteController {
 
     private final EstudianteService estudianteService;
+    private final MatriculaService matriculaService;
 
     @PostMapping
     public ResponseEntity<EstudianteResponseDTO> registrar(@Valid @RequestBody EstudianteRequestDTO request) {
@@ -45,5 +49,11 @@ public class EstudianteController {
     public ResponseEntity<EstudianteResponseDTO> actualizar(@PathVariable Long id,
                                                               @Valid @RequestBody EstudianteRequestDTO request) {
         return ResponseEntity.ok(estudianteService.actualizar(id, request));
+    }
+
+    @GetMapping("/{id}/matriculas")
+    public ResponseEntity<List<MatriculaResponseDTO>> historial(@PathVariable Long id,
+                                                                  @RequestParam(required = false) String periodo) {
+        return ResponseEntity.ok(matriculaService.historialPorEstudiante(id, periodo));
     }
 }
