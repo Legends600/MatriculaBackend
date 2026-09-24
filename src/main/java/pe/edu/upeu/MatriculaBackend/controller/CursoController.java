@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import pe.edu.upeu.MatriculaBackend.dto.CursoRequestDTO;
 import pe.edu.upeu.MatriculaBackend.dto.CursoResponseDTO;
@@ -35,6 +36,17 @@ public class CursoController {
     @GetMapping
     public ResponseEntity<List<CursoResponseDTO>> listar() {
         return ResponseEntity.ok(cursoService.listar());
+    }
+
+    @GetMapping("/buscar")
+    public ResponseEntity<List<CursoResponseDTO>> buscar(
+            @RequestParam(required = false) String nombre,
+            @RequestParam(required = false) Long carreraId,
+            @RequestParam(required = false) Integer ciclo,
+            @RequestParam(required = false) Boolean conVacantes,
+            @RequestParam(required = false) String ordenarPor,
+            @RequestParam(required = false) String direccion) {
+        return ResponseEntity.ok(cursoService.buscar(nombre, carreraId, ciclo, conVacantes, ordenarPor, direccion));
     }
 
     @GetMapping("/{id}")
