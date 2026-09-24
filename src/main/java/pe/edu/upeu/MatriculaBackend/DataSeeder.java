@@ -1,4 +1,4 @@
-package pe.edu.upeu.MatriculaBackend.config;
+package pe.edu.upeu.MatriculaBackend;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
