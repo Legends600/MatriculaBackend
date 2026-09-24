@@ -81,6 +81,7 @@ public class CarreraServiceImpl implements CarreraService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<CursoResponseDTO> listarCursosDeCarrera(Long carreraId) {
         buscarOFallar(carreraId);
         return cursoRepository.findByCarreraId(carreraId).stream().map(this::toCursoResponse).toList();
