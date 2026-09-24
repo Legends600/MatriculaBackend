@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import pe.edu.upeu.MatriculaBackend.dto.CarreraRequestDTO;
 import pe.edu.upeu.MatriculaBackend.dto.CarreraResponseDTO;
+import pe.edu.upeu.MatriculaBackend.dto.CursoResponseDTO;
 import pe.edu.upeu.MatriculaBackend.service.service.CarreraService;
 
 import java.util.List;
@@ -52,5 +53,10 @@ public class CarreraController {
     public ResponseEntity<Void> eliminar(@PathVariable Long id) {
         carreraService.eliminar(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/{id}/cursos")
+    public ResponseEntity<List<CursoResponseDTO>> listarCursos(@PathVariable Long id) {
+        return ResponseEntity.ok(carreraService.listarCursosDeCarrera(id));
     }
 }
