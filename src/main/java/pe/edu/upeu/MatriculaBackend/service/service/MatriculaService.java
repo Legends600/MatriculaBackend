@@ -15,4 +15,6 @@ public interface MatriculaService {
     List<MatriculaResponseDTO> listar();
 
     AnulacionResponseDTO anular(Long id);
+
+    List<MatriculaResponseDTO> historialPorEstudiante(Long estudianteId, String periodo);
 }

@@ -160,6 +160,17 @@ public class MatriculaServiceImpl implements MatriculaService {
         return new AnulacionResponseDTO(matricula.getId(), matricula.getEstado(), vacantes);
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public List<MatriculaResponseDTO> historialPorEstudiante(Long estudianteId, String periodo) {
+        if (!estudianteRepository.existsById(estudianteId)) {
+            throw new RecursoNoEncontradoException("Estudiante no encontrado con id " + estudianteId);
+        }
+        return matriculaRepository.buscarHistorialPorEstudiante(estudianteId, periodo).stream()
+                .map(this::toResponse)
+                .toList();
+    }
+
     private Matricula buscarOFallar(Long id) {
         return matriculaRepository.findById(id)
                 .orElseThrow(() -> new RecursoNoEncontradoException("Matrícula no encontrada con id " + id));
