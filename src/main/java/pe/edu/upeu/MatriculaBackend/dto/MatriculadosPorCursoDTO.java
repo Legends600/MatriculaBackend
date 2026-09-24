@@ -1,4 +1,11 @@
 package pe.edu.upeu.MatriculaBackend.dto;
 
-public class MatriculadosPorCursoDTO {
+import java.math.BigDecimal;
+
+public record MatriculadosPorCursoDTO(
+        String codigo,
+        String curso,
+        Long matriculados,
+        BigDecimal montoRecaudado
+) {
 }
