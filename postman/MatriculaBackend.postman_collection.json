@@ -633,6 +633,63 @@
           ]
         }
       ]
+    },
+    {
+      "name": "SC-A Historial de matrículas por estudiante",
+      "item": [
+        {
+          "name": "GET /estudiantes/{id}/matriculas historial completo",
+          "request": { "method": "GET", "url": "{{baseUrl}}/api/v1/estudiantes/1/matriculas" },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('status 200', () => pm.response.to.have.status(200));",
+                  "const body = pm.response.json();",
+                  "pm.test('viene ordenado de mas reciente a mas antigua', () => {",
+                  "  for (let i = 1; i < body.length; i++) {",
+                  "    pm.expect(Date.parse(body[i - 1].fecha)).to.be.at.least(Date.parse(body[i].fecha));",
+                  "  }",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /estudiantes/{id}/matriculas filtrado por periodo",
+          "request": { "method": "GET", "url": "{{baseUrl}}/api/v1/estudiantes/1/matriculas?periodo=2026-2" },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('status 200', () => pm.response.to.have.status(200));",
+                  "const body = pm.response.json();",
+                  "pm.test('todas las matriculas son del periodo solicitado', () => {",
+                  "  body.forEach(m => pm.expect(m.periodo).to.eql('2026-2'));",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /estudiantes/{id}/matriculas con estudiante inexistente -> 404",
+          "request": { "method": "GET", "url": "{{baseUrl}}/api/v1/estudiantes/999999/matriculas" },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('status 404', () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
     }
   ]
 }
