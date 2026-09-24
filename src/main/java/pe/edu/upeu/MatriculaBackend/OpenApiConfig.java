@@ -1,4 +1,4 @@
-package pe.edu.upeu.MatriculaBackend.config;
+package pe.edu.upeu.MatriculaBackend;
 
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
