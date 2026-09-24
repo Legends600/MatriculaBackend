@@ -13,6 +13,7 @@ import pe.edu.upeu.MatriculaBackend.exception.ReglaNegocioException;
 import pe.edu.upeu.MatriculaBackend.exception.RecursoNoEncontradoException;
 import pe.edu.upeu.MatriculaBackend.repository.CarreraRepository;
 import pe.edu.upeu.MatriculaBackend.repository.CursoRepository;
+import pe.edu.upeu.MatriculaBackend.repository.EstudianteRepository;
 import pe.edu.upeu.MatriculaBackend.service.service.CarreraService;
 
 import java.util.List;
@@ -24,6 +25,7 @@ public class CarreraServiceImpl implements CarreraService {
 
     private final CarreraRepository carreraRepository;
     private final CursoRepository cursoRepository;
+    private final EstudianteRepository estudianteRepository;
 
     @Override
     @Transactional
@@ -69,6 +71,10 @@ public class CarreraServiceImpl implements CarreraService {
         if (cursoRepository.existsByCarreraId(id)) {
             log.warn("No se puede eliminar la carrera id={} porque tiene cursos asociados", id);
             throw new ReglaNegocioException("No se puede eliminar la carrera porque tiene cursos asociados");
+        }
+        if (estudianteRepository.existsByCarreraId(id)) {
+            log.warn("No se puede eliminar la carrera id={} porque tiene estudiantes asociados", id);
+            throw new ReglaNegocioException("No se puede eliminar la carrera porque tiene estudiantes asociados");
         }
         carreraRepository.delete(carrera);
         log.info("Carrera eliminada id={}", id);
